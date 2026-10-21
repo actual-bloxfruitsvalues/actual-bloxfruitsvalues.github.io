@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#090b12">
+<title>Blox Fruits Value Website</title>
+<style>
+  :root {
+    --bg: #080a11;
+    --panel: rgba(18, 22, 36, .88);
+    --panel-2: #111625;
+    --line: rgba(148, 163, 184, .16);
+    --text: #edf2ff;
+    --muted: #8d99b5;
+    --accent: #8b5cf6;
+    --accent-2: #22d3ee;
+    --danger: #fb7185;
+    --success: #34d399;
+    --radius: 18px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; min-height: 100vh; color: var(--text);
+    background:
+      radial-gradient(ellipse at 12% 0%, rgba(124,58,237,.18), transparent 35%),
+      radial-gradient(ellipse at 92% 15%, rgba(6,182,212,.10), transparent 32%),
+      var(--bg);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  button, input, select { font: inherit; }
+  button { cursor: pointer; }
+  .shell { width: min(1180px, calc(100% - 32px)); margin: 0 auto; }
+  header {
+    position: sticky; top: 0; z-index: 10;
+    border-bottom: 1px solid var(--line);
+    background: rgba(8,10,17,.82); backdrop-filter: blur(18px);
+  }
+  .nav { display:flex; align-items:center; justify-content:space-between; gap:16px; padding: 17px 0; }
+  .brand { display:flex; align-items:center; gap:12px; font-weight:800; letter-spacing:-.04em; }
+  .brand-mark {
+    width: 40px; height: 40px; border-radius: 13px; display:grid; place-items:center;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color:white; box-shadow: 0 0 28px rgba(139,92,246,.28); font-size:20px;
+  }
+  .brand span { display:block; font-size:17px; }
+  .brand small { display:block; color:var(--muted); font-size:10px; letter-spacing:.15em; text-transform:uppercase; margin-top:2px; }
+  .nav-actions { display:flex; align-items:center; gap:10px; }
+  .pill {
+    display:inline-flex; align-items:center; gap:7px; padding:8px 11px; border:1px solid var(--line);
+    border-radius:999px; color:var(--muted); font-size:12px; white-space:nowrap;
+    background:rgba(255,255,255,.025);
+  }
+  .dot { width:7px; height:7px; border-radius:50%; background:var(--success); box-shadow:0 0 12px var(--success); }
+  .hero { padding: 58px 0 30px; animation: rise .65s ease both; }
+  .eyebrow { color:var(--accent-2); font-size:11px; font-weight:800; letter-spacing:.2em; text-transform:uppercase; }
+  h1 { margin:12px 0 12px; font-size:clamp(32px, 6vw, 60px); line-height:1.02; letter-spacing:-.055em; max-width:800px; }
+  h1 .gradient { background:linear-gradient(90deg,#fff 0%,#b8a4ff 48%,#67e8f9 100%); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .hero p { max-width:650px; color:var(--muted); line-height:1.7; margin:0; font-size:15px; }
+  .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:28px 0 22px; }
+  .stat { border:1px solid var(--line); border-radius:16px; padding:16px 18px; background:linear-gradient(135deg,rgba(255,255,255,.045),rgba(255,255,255,.015)); }
+  .stat strong { display:block; font-size:24px; letter-spacing:-.04em; }
+  .stat span { color:var(--muted); font-size:12px; }
+  .toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding:16px; border:1px solid var(--line); border-radius:var(--radius); background:var(--panel); box-shadow:0 20px 60px rgba(0,0,0,.12); }
+  .search-wrap { flex:1 1 260px; position:relative; }
+  .search-wrap svg { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--muted); }
+  .search-wrap input { width:100%; padding-left:42px; }
+  input, select {
+    min-width:0; padding:12px 13px; color:var(--text); background:#0b0f1b; border:1px solid var(--line); border-radius:12px; outline:none;
+    transition:border-color .2s, box-shadow .2s;
+  }
+  input:focus, select:focus { border-color:rgba(139,92,246,.8); box-shadow:0 0 0 3px rgba(139,92,246,.12); }
+  input::placeholder { color:#65708a; }
+  .btn { border:1px solid transparent; border-radius:12px; padding:12px 15px; color:white; font-weight:700; font-size:13px; transition:transform .2s, filter .2s, border-color .2s; }
+  .btn:hover { transform:translateY(-1px); filter:brightness(1.1); }
+  .btn-primary { background:linear-gradient(135deg,#7c3aed,#5b6df6); box-shadow:0 8px 24px rgba(124,58,237,.18); }
+  .btn-secondary { background:#151b2c; border-color:var(--line); color:#dbe5ff; }
+  .btn-quiet { background:transparent; border-color:var(--line); color:var(--muted); }
+  .section-head { display:flex; justify-content:space-between; align-items:end; gap:14px; margin:30px 0 13px; }
+  .section-head h2 { margin:0; font-size:20px; letter-spacing:-.035em; }
+  .section-head p { margin:5px 0 0; color:var(--muted); font-size:12px; }
+  .count { color:var(--muted); font-size:12px; }
+  .category-tabs { display:flex; gap:9px; overflow-x:auto; padding:3px 0 8px; scrollbar-width:thin; }
+  .tab { flex:0 0 auto; border:1px solid var(--line); border-radius:14px; padding:12px 18px; background:#090909; color:#aaa; font-weight:700; }
+  .tab.active { background:#292929; border-color:#454545; color:#fff; }
+  .toolbar { background:transparent; border:0; box-shadow:none; padding:10px 0; }
+  .toolbar .search-wrap { flex-basis:100%; }
+  .toolbar .search-wrap input { padding:16px 16px 16px 46px; background:#050505; border-color:#242424; border-radius:16px; }
+  .toolbar select { background:#090909; border-color:#242424; padding:14px; }
+  .view-controls { display:flex; flex-wrap:wrap; align-items:center; gap:10px; width:100%; }
+  .mode-toggle { display:flex; gap:5px; padding:5px; border:1px solid #252525; border-radius:14px; background:#080808; }
+  .mode-toggle button { border:0; border-radius:10px; padding:10px 14px; color:#888; background:transparent; font-weight:700; }
+  .mode-toggle button.active { background:#7138e8; color:white; }
+  .table-shell { border:0; background:transparent; overflow:visible; }
+  .table-head { display:none; }
+  #itemList { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; }
+  .item-row { min-width:0; overflow:hidden; border:1px solid #242424; border-radius:25px; background:#050505; animation:rowIn .35s ease both; transition:transform .2s,border-color .2s; }
+  .item-row:hover { transform:translateY(-3px); border-color:#444; }
+  .card-art { height:230px; display:grid; place-items:center; position:relative; border-bottom:1px solid #222; padding:25px; }
+  .rarity { position:absolute; top:16px; right:16px; color:#e05a65; background:rgba(105,24,30,.35); border:1px solid rgba(224,90,101,.45); border-radius:12px; padding:7px 12px; font-size:12px; font-weight:900; letter-spacing:.04em; min-width:72px; text-align:center; }
+  .rarity-common { color:#c2c2c2; background:rgba(150,150,150,.16); border-color:rgba(190,190,190,.4); }
+  .rarity-uncommon { color:#35d46a; background:rgba(30,150,65,.17); border-color:rgba(53,212,106,.45); }
+  .rarity-rare { color:#4d9dff; background:rgba(35,105,210,.18); border-color:rgba(77,157,255,.48); }
+  .rarity-legendary { color:#ffd43b; background:rgba(190,140,10,.18); border-color:rgba(255,212,59,.48); }
+  .rarity-mythical { color:#ff4545; background:rgba(170,30,30,.2); border-color:rgba(255,69,69,.5); }
+  .fruit-icon { width:100%; height:100%; min-width:0; min-height:0; display:flex; align-items:center; justify-content:center; color:#555; font-size:12px; overflow:hidden; }
+  .fruit-icon img { display:block; width:auto; height:auto; max-width:100%; max-height:100%; object-fit:contain; object-position:center; flex:0 1 auto; }
+  .card-content { padding:20px; }
+  .card-title-row { display:flex; align-items:start; justify-content:space-between; gap:8px; }
+  .item-name { font-size:20px; font-weight:800; min-height:26px; overflow-wrap:anywhere; }
+  .item-sub { display:none; }
+  .card-toggle { display:flex; gap:4px; padding:4px; border:1px solid #292929; border-radius:13px; background:#151515; margin:14px 0 20px; }
+  .card-toggle button { flex:1; border:0; border-radius:10px; padding:9px 6px; color:#777; background:transparent; font-size:12px; font-weight:800; }
+  .card-toggle button.active { color:#fff; background:#793ce8; }
+  .value-line { display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin:4px 0 18px; }
+  .value { font-size:32px; font-weight:900; letter-spacing:-.04em; overflow-wrap:anywhere; }
+  .value.empty { color:#555; font-weight:500; }
+  .trade-status { color:#e5a43b; font-size:14px; font-weight:800; text-align:right; }
+  .demand-bars { display:flex; gap:4px; margin-bottom:7px; }
+  .demand-bars span { height:8px; flex:1; border-radius:20px; background:#333; opacity:.65; }
+  .meta-line { display:flex; justify-content:space-between; gap:12px; margin-top:13px; color:#777; font-size:14px; }
+  .meta-line strong { color:#d8d8d8; font-weight:700; text-align:right; overflow-wrap:anywhere; }
+  .meta-line .fruit-kind { color:#9fc4ff; }
+  .card-actions { display:flex; justify-content:flex-end; gap:7px; margin-top:17px; padding-top:13px; border-top:1px solid #202020; }
+  .icon-btn { width:34px; height:34px; border:1px solid #292929; border-radius:10px; background:#101010; color:#aaa; display:grid; place-items:center; }
+  .icon-btn:hover { color:white; border-color:#7540dc; }
+  .empty-state { padding:45px 20px; text-align:center; color:var(--muted); }
+  .empty-state strong { display:block; color:var(--text); margin-bottom:7px; }
+  .notice { margin:17px 0 36px; padding:14px 16px; border:1px solid rgba(34,211,238,.17); background:rgba(34,211,238,.045); border-radius:14px; color:#a9c4d8; font-size:12px; line-height:1.6; }
+  footer { padding:25px 0 35px; border-top:1px solid var(--line); color:#69748e; font-size:11px; }
+  footer .foot { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .modal-backdrop { position:fixed; inset:0; z-index:30; display:none; place-items:center; padding:18px; background:rgba(2,4,10,.75); backdrop-filter:blur(8px); }
+  .modal-backdrop.open { display:grid; animation:fade .18s ease; }
+  .modal { width:min(520px,100%); padding:23px; border:1px solid rgba(148,163,184,.22); border-radius:22px; background:#101525; box-shadow:0 30px 100px rgba(0,0,0,.55); animation:rise .25s ease; }
+  .modal-top { display:flex; justify-content:space-between; align-items:start; gap:15px; margin-bottom:18px; }
+  .modal h3 { margin:0; font-size:21px; }
+  .modal p { color:var(--muted); font-size:12px; line-height:1.5; margin:6px 0 0; }
+  .close-btn { border:0; background:transparent; color:var(--muted); font-size:24px; line-height:1; }
+  .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:13px; }
+  .field { display:flex; flex-direction:column; gap:7px; }
+  .field.full { grid-column:1/-1; }
+  .field label { font-size:11px; color:#aab5ce; font-weight:700; }
+  .field input, .field select { width:100%; }
+  .modal-actions { display:flex; justify-content:space-between; gap:10px; margin-top:20px; }
+  .modal-actions-right { display:flex; gap:8px; margin-left:auto; }
+  .danger { color:var(--danger); }
+  .toast { position:fixed; left:50%; bottom:22px; z-index:50; transform:translate(-50%,20px); opacity:0; pointer-events:none; background:#172137; color:#e8f2ff; border:1px solid var(--line); border-radius:12px; padding:12px 16px; font-size:13px; box-shadow:0 10px 35px #0007; transition:.25s; }
+  .toast.show { opacity:1; transform:translate(-50%,0); }
+  @keyframes rise { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes rowIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes fade { from { opacity:0; } to { opacity:1; } }
+  @media (max-width:680px) {
+    .shell { width:min(100% - 22px,1180px); }
+    .nav { padding:12px 0; }
+    .brand span { font-size:14px; }
+    .brand-mark { width:36px;height:36px; }
+    .nav-actions .pill { display:none; }
+    .hero { padding:39px 0 20px; }
+    .hero p { font-size:14px; }
+    .stats { gap:8px; }
+    .stat { padding:12px 10px; }
+    .stat strong { font-size:20px; }
+    .stat span { font-size:10px; }
+    .toolbar { padding:11px; gap:8px; }
+    .toolbar .btn { flex:1; }
+    #itemList { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+    .card-art { height:145px; padding:15px; }
+    .rarity { top:8px; right:8px; font-size:9px; padding:5px 7px; }
+    .card-content { padding:12px; }
+    .item-name { font-size:16px; }
+    .card-toggle { margin:11px 0 14px; }
+    .card-toggle button { font-size:10px; padding:8px 3px; }
+    .value { font-size:23px; }
+    .trade-status { font-size:11px; }
+    .meta-line { font-size:11px; }
+    .demand-bars { gap:2px; }
+    .demand-bars span { height:6px; }
+    .toolbar .btn { flex:initial; }
+    .section-head { align-items:start; }
+    .form-grid { grid-template-columns:1fr; }
+    .field.full { grid-column:auto; }
+    .modal { padding:18px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; scroll-behavior:auto !important; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="shell nav">
+    <div class="brand">
+      <div class="brand-mark">B</div>
+      <div><span>Blox Fruits Value Website</span><small>Community value index</small></div>
+    </div>
+    <div class="nav-actions">
+      <div class="pill"><span class="dot"></span> Saved on this device</div>
+      <button class="btn btn-primary" id="addTop">＋ Add item</button>
+    </div>
+  </div>
+</header>
+
+<main class="shell">
+  <section class="hero">
+    <div class="eyebrow">◆ Trading reference · Customizable</div>
+    <h1>Your trading values.<br><span class="gradient">Your database.</span></h1>
+    <p>A sleek, searchable value list for Blox Fruits and limited items. Add your own icons, names, and values — changes are saved automatically in this browser.</p>
+    <div class="stats">
+      <div class="stat"><strong id="totalCount">0</strong><span>Total items</span></div>
+      <div class="stat"><strong id="filledCount">0</strong><span>Values entered</span></div>
+      <div class="stat"><strong id="limitedCount">0</strong><span>Limited items</span></div>
+    </div>
+  </section>
+
+  <nav class="category-tabs" aria-label="Categories">
+    <button class="tab active" data-category="all">All</button>
+    <button class="tab" data-category="fruit">Fruits <span id="fruitTabCount">0</span></button>
+    <button class="tab" data-category="gamepass">Gamepasses <span id="gamepassTabCount">0</span></button>
+    <button class="tab" data-category="limited">Limited</button>
+  </nav>
+  <section class="toolbar" aria-label="Search and filters">
+    <div class="search-wrap">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input id="searchInput" type="search" placeholder="Search fruits, limited items, values…" autocomplete="off" aria-label="Search items">
+    </div>
+    <div class="view-controls">
+    <div class="mode-toggle" id="fruitModeToggle" aria-label="Fruit ownership mode">
+      <button type="button" class="active" data-mode="regular">Regular</button>
+      <button type="button" data-mode="permanent">Permanent</button>
+    </div>
+    <select id="sortSelect" aria-label="Sort items">
+      <option value="custom">Custom order</option>
+      <option value="name">Name A–Z</option>
+      <option value="value-desc">Value: high to low</option>
+      <option value="value-asc">Value: low to high</option>
+    </select>
+    <button class="btn btn-secondary" id="exportBtn">Export backup</button>
+    <button class="btn btn-secondary" id="importBtn">Import</button>
+    <input id="importFile" type="file" accept="application/json,.json" hidden>
+    </div>
+  </section>
+
+  <div class="section-head">
+    <div><h2>Value database</h2><p>Blank rows are ready for you to fill in.</p></div>
+    <span class="count" id="resultCount">0 items</span>
+  </div>
+
+  <section class="table-shell" aria-label="Value database">
+    <div id="itemList"></div>
+  </section>
+
+  <div class="notice">
+    <strong>Heads up:</strong> This is a personal, editable tracker, not an official Blox Fruits value feed. Values are intentionally left blank until you enter them. Data is saved in this browser using local storage; use <em>Export backup</em> to keep a copy or move your data to another device.
+  </div>
+</main>
+
+<footer>
+  <div class="shell foot"><span>© <span id="year"></span> Blox Fruits Value Website</span><span>Fan-made tracker · Not affiliated with the game developers</span></div>
+</footer>
+
+<div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal">
+    <div class="modal-top">
+      <div><h3 id="modalTitle">Add item</h3><p>Leave any field blank if you want to fill it in later.</p></div>
+      <button class="close-btn" id="closeModal" aria-label="Close dialog">×</button>
+    </div>
+    <form id="itemForm">
+      <div class="form-grid">
+        <div class="field full"><label for="itemName">Item name</label><input id="itemName" placeholder="e.g. Dragon" maxlength="80"></div>
+        <div class="field full"><label for="itemIconFile">Upload icon image from your device</label><input id="itemIconFile" type="file" accept="image/*"><small id="itemIconHelp" style="color:#8d99b5;line-height:1.5">Choose an image from your device. Leave empty to keep the current image.</small><div id="itemIconPreview" style="display:none;align-items:center;gap:10px;margin-top:4px"><img id="itemIconPreviewImage" alt="Current item icon" style="width:64px;height:64px;object-fit:contain;border:1px solid #292929;border-radius:10px;background:#080a11;padding:5px"><span style="font-size:12px;color:#8d99b5">Current image</span></div></div>
+        <div class="field"><label for="itemValue">Regular value</label><input id="itemValue" type="text" inputmode="text" placeholder="e.g. 2B, 10M, 500K"></div>
+        <div class="field" id="permanentValueField"><label for="itemPermanentValue">Permanent value</label><input id="itemPermanentValue" type="text" inputmode="text" placeholder="e.g. 2B, 10M, 500K"></div>
+        <div class="field"><label for="itemType">Category</label><select id="itemType"><option value="fruit">Fruit</option><option value="gamepass">Gamepass</option><option value="limited">Limited item</option></select></div>
+        <div class="field"><label for="itemRarity">Rarity label</label><input id="itemRarity" placeholder="Leave blank"></div>
+        <div class="field"><label for="itemStatus">Value status</label><input id="itemStatus" placeholder="Overpaid / Stable / Low"></div>
+        <div class="field"><label for="itemDemand">Demand (out of 10)</label><input id="itemDemand" placeholder="Leave blank"></div>
+        <div class="field" id="fruitTypeField"><label for="itemFruitType">Fruit type</label><input id="itemFruitType" placeholder="Beast / Natural / Logia"></div>
+        <div class="field"><label for="itemBeli">Beli price</label><input id="itemBeli" placeholder="Leave blank"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-quiet danger" type="button" id="deleteBtn" style="display:none">Delete item</button>
+        <div class="modal-actions-right"><button class="btn btn-secondary" type="button" id="cancelBtn">Cancel</button><button class="btn btn-primary" type="submit">Save item</button></div>
+      </div>
+    </form>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  const STORAGE_KEY = "bf-value-website-items-v1";
+  const REQUIRED_SLOTS = { fruit: 43, limited: 40, gamepass: 9 };
+  function createBlankItem(type) {
+    return {
+      id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      name: "", icon: "", value: "", permanentValue: "", status: "", rarity: "",
+      demand: "", fruitType: "", beli: "", type, blankSlot: true
+    };
+  }
+  const starterItems = [
+    ...Array.from({length: REQUIRED_SLOTS.fruit}, () => createBlankItem("fruit")),
+    ...Array.from({length: REQUIRED_SLOTS.gamepass}, () => createBlankItem("gamepass")),
+    ...Array.from({length: REQUIRED_SLOTS.limited}, () => createBlankItem("limited"))
+  ];
+
+  const $ = id => document.getElementById(id);
+  let items = loadItems();
+  let editingId = null;
+  let activeCategory = "all";
+  let fruitMode = "regular";
+  let toastTimer;
+
+  function loadItems() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          const loaded = parsed.map(x => ({
+            permanentValue: "", rarity: "", status: "", demand: "", fruitType: "", beli: "",
+            ...x,
+            type: ["fruit","gamepass","limited"].includes(x.type) ? x.type : "fruit"
+          }));
+          // Preserve saved items and add blank cards until each category has its requested slot count.
+          for (const [type, requiredCount] of Object.entries(REQUIRED_SLOTS)) {
+            const currentCount = loaded.filter(item => item.type === type).length;
+            for (let i = currentCount; i < requiredCount; i++) loaded.push(createBlankItem(type));
+          }
+          return loaded;
+        }
+      }
+    } catch (e) { console.warn("Could not load saved items", e); }
+    return starterItems;
+  }
+  function saveItems() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      updateStats();
+    } catch (e) {
+      showToast("Could not save data. Export a backup or free browser storage.");
+    }
+  }
+  function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function formatValue(value) {
+    if (value === "" || value === null || value === undefined) return "";
+    const text = String(value).trim();
+    if (!text) return "";
+    // Keep shorthand values such as 2B and 10M exactly as entered.
+    if (!/^\d+(?:\.\d+)?$/.test(text)) return text;
+    return Number(text).toLocaleString("en-US", {maximumFractionDigits: 2});
+  }
+  function updateStats() {
+    $("totalCount").textContent = items.length;
+    $("filledCount").textContent = items.filter(x => x.value !== "" && x.value !== null && x.value !== undefined).length;
+    $("limitedCount").textContent = items.filter(x => x.type === "limited").length;
+    $("fruitTabCount").textContent = items.filter(x => x.type === "fruit").length;
+    $("gamepassTabCount").textContent = items.filter(x => x.type === "gamepass").length;
+  }
+  function render() {
+    const query = $("searchInput").value.trim().toLowerCase();
+    const sort = $("sortSelect").value;
+    let filtered = items.filter(item => {
+      const matchesText = [item.name, item.value, item.permanentValue, item.type, item.rarity, item.status, item.demand, item.fruitType, item.beli]
+        .some(v => String(v ?? "").toLowerCase().includes(query));
+      return matchesText && (activeCategory === "all" || item.type === activeCategory);
+    });
+    if (sort === "name") filtered.sort((a,b) => (a.name || "").localeCompare(b.name || ""));
+    if (sort === "value-desc") filtered.sort((a,b) => numericValue(a[a.type === "fruit" && fruitMode === "permanent" ? "permanentValue" : "value"]) - numericValue(b[b.type === "fruit" && fruitMode === "permanent" ? "permanentValue" : "value"])).reverse();
+    if (sort === "value-asc") filtered.sort((a,b) => numericValue(a[a.type === "fruit" && fruitMode === "permanent" ? "permanentValue" : "value"]) - numericValue(b[b.type === "fruit" && fruitMode === "permanent" ? "permanentValue" : "value"]));
+
+    $("fruitModeToggle").style.display = activeCategory === "gamepass" || activeCategory === "limited" ? "none" : "flex";
+    $("resultCount").textContent = `${filtered.length} item${filtered.length === 1 ? "" : "s"}`;
+    const list = $("itemList");
+    if (!filtered.length) {
+      list.innerHTML = '<div class="empty-state"><strong>No items found</strong>Try a different search, or add a new item.</div>';
+      return;
+    }
+    list.innerHTML = filtered.map((item, index) => {
+      const hasName = String(item.name || "").trim().length > 0;
+      const icon = item.icon ? `<img src="${escapeHtml(item.icon)}" alt="" loading="lazy" onerror="this.remove();">` : "";
+      const name = hasName ? escapeHtml(item.name) : " ";
+      const rarity = escapeHtml(item.rarity || "");
+      const rarityKey = String(item.rarity || "").trim().toLowerCase();
+      const rarityClass = ({common:"rarity-common", uncommon:"rarity-uncommon", rare:"rarity-rare", legendary:"rarity-legendary", mythical:"rarity-mythical"})[rarityKey] || "";
+      const valueField = item.type === "fruit" && fruitMode === "permanent" ? "permanentValue" : "value";
+      const rawValue = item[valueField];
+      const value = formatValue(rawValue);
+      const typeLabel = item.type === "limited" ? "LIMITED ITEM" : item.type === "gamepass" ? "GAMEPASS" : "BLOX FRUIT";
+      const showFruitToggle = item.type === "fruit";
+      const status = escapeHtml(item.status || "");
+      const demandNumber = Number(item.demand);
+      const demand = escapeHtml(item.demand || "");
+      const demandColor = !item.demand || !Number.isFinite(demandNumber) ? "#333" : demandNumber <= 3 ? "#ff4545" : demandNumber <= 6 ? "#ffd43b" : "#22c55e";
+      const fruitType = escapeHtml(item.fruitType || "");
+      const beli = escapeHtml(item.beli || "");
+      return `<article class="item-row" style="animation-delay:${Math.min(index,10)*25}ms">
+        <div class="card-art">
+          ${rarity ? `<div class="rarity ${rarityClass}">${rarity}</div>` : `<div class="rarity" style="color:transparent;border-color:transparent;background:transparent"></div>`}
+          <div class="fruit-icon">${icon}</div>
+        </div>
+        <div class="card-content">
+          <div class="card-title-row"><div style="min-width:0"><div class="item-name">${name || "&nbsp;"}</div><div class="item-sub">${typeLabel}</div></div></div>
+          ${showFruitToggle ? `<div class="card-toggle"><button type="button" data-card-mode="regular" data-id="${escapeHtml(item.id)}" class="${fruitMode === "regular" ? "active" : ""}">Regular</button><button type="button" data-card-mode="permanent" data-id="${escapeHtml(item.id)}" class="${fruitMode === "permanent" ? "active" : ""}">Permanent</button></div>` : ""}
+          <div class="value-line"><span class="value ${value === "" ? "empty" : ""}">${value === "" ? "&nbsp;" : escapeHtml(value)}</span><span class="trade-status">${status}</span></div>
+          <div class="demand-bars">${Array.from({length:10},(_,n)=>`<span style="${demand && n < demandNumber ? `background:${demandColor};opacity:.95` : ""}"></span>`).join("")}</div>
+          <div class="meta-line"><span>Demand</span><strong>${demand ? `${demand}/10` : ""}</strong></div>
+          <div class="meta-line"><span>Beli Price</span><strong style="color:#e4ad4c">${beli}</strong></div>
+          ${showFruitToggle ? `<div class="meta-line"><span>Fruit type</span><strong class="fruit-kind">${fruitType}</strong></div>` : ""}
+          <div class="card-actions">
+            <button class="icon-btn" title="Edit item" aria-label="Edit item" data-edit="${escapeHtml(item.id)}">✎</button>
+            <button class="icon-btn" title="Duplicate item" aria-label="Duplicate item" data-duplicate="${escapeHtml(item.id)}">＋</button>
+          </div>
+        </div>
+      </article>`;
+    }).join("");
+  }
+  function numericValue(value) {
+    if (value === "" || value === null || value === undefined) return -1;
+    const text = String(value).trim().replace(/,/g, "");
+    const match = text.match(/^(-?\d+(?:\.\d+)?)\s*([KMB])?$/i);
+    if (!match) return -1;
+    const amount = Number(match[1]);
+    const multiplier = ({K: 1e3, M: 1e6, B: 1e9})[(match[2] || "").toUpperCase()] || 1;
+    return Number.isFinite(amount) ? amount * multiplier : -1;
+  }
+  function openModal(item = null) {
+    editingId = item ? item.id : null;
+    $("modalTitle").textContent = item ? "Edit item" : "Add item";
+    $("itemName").value = item?.name ?? "";
+    $("itemIconFile").value = "";
+    const preview = $("itemIconPreview");
+    const previewImage = $("itemIconPreviewImage");
+    $("itemIconPreview").querySelector("span").textContent = "Current image";
+    if (item?.icon) { previewImage.src = item.icon; preview.style.display = "flex"; }
+    else { previewImage.removeAttribute("src"); preview.style.display = "none"; }
+    $("itemValue").value = item?.value ?? "";
+    $("itemPermanentValue").value = item?.permanentValue ?? "";
+    $("itemType").value = item?.type ?? "fruit";
+    updateTypeFields();
+    $("itemRarity").value = item?.rarity ?? "";
+    $("itemStatus").value = item?.status ?? "";
+    $("itemDemand").value = item?.demand ?? "";
+    $("itemFruitType").value = item?.fruitType ?? "";
+    $("itemBeli").value = item?.beli ?? "";
+    $("deleteBtn").style.display = item ? "inline-flex" : "none";
+    $("modalBackdrop").classList.add("open");
+    setTimeout(() => $("itemName").focus(), 60);
+  }
+  function updateTypeFields() {
+    const isFruit = $("itemType").value === "fruit";
+    $("permanentValueField").style.display = isFruit ? "flex" : "none";
+    $("fruitTypeField").style.display = isFruit ? "flex" : "none";
+  }
+  $("itemType").addEventListener("change", updateTypeFields);
+  function closeModal() {
+    $("modalBackdrop").classList.remove("open");
+    editingId = null;
+    $("itemForm").reset();
+  }
+  function showToast(message) {
+    const toast = $("toast");
+    toast.textContent = message;
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove("show"), 2600);
+  }
+  function makeId() {
+    return crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  }
+
+  function readImageAsDataURL(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ""));
+      reader.onerror = () => reject(reader.error || new Error("Image read failed"));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  $("itemIconFile").addEventListener("change", () => {
+    const file = $("itemIconFile").files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { showToast("Please choose an image file."); $("itemIconFile").value = ""; return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      $("itemIconPreviewImage").src = String(reader.result || "");
+      $("itemIconPreview").style.display = "flex";
+      $("itemIconPreview").querySelector("span").textContent = "New image selected";
+    };
+    reader.readAsDataURL(file);
+  });
+
+  $("itemForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const selectedImage = $("itemIconFile").files?.[0];
+    let icon = editingId ? (items.find(x => x.id === editingId)?.icon || "") : "";
+    if (selectedImage) {
+      if (!selectedImage.type.startsWith("image/")) { showToast("Please choose an image file."); return; }
+      try { icon = await readImageAsDataURL(selectedImage); }
+      catch (error) { showToast("Could not read that image. Try another file."); return; }
+    }
+    const data = {
+      name: $("itemName").value.trim(),
+      icon,
+      value: $("itemValue").value.trim(),
+      permanentValue: $("itemPermanentValue").value.trim(),
+      rarity: $("itemRarity").value.trim(),
+      status: $("itemStatus").value.trim(),
+      demand: $("itemDemand").value.trim(),
+      fruitType: $("itemFruitType").value.trim(),
+      beli: $("itemBeli").value.trim(),
+      type: $("itemType").value,
+      blankSlot: false
+    };
+    if (editingId) {
+      const index = items.findIndex(x => x.id === editingId);
+      if (index >= 0) items[index] = {...items[index], ...data};
+      showToast("Item updated and saved.");
+    } else {
+      items.unshift({...data, id: makeId()});
+      showToast("Item added and saved.");
+    }
+    saveItems(); render(); closeModal();
+  });
+  $("itemList").addEventListener("click", e => {
+    const edit = e.target.closest("[data-edit]");
+    const duplicate = e.target.closest("[data-duplicate]");
+    if (edit) {
+      const item = items.find(x => x.id === edit.dataset.edit);
+      if (item) openModal(item);
+    } else if (duplicate) {
+      const item = items.find(x => x.id === duplicate.dataset.duplicate);
+      if (item) {
+        items.unshift({...item, id:makeId(), name:item.name ? `${item.name} copy` : "", blankSlot:false});
+        saveItems(); render(); showToast("Item duplicated.");
+      }
+    }
+  });
+  $("deleteBtn").addEventListener("click", () => {
+    if (!editingId) return;
+    if (confirm("Delete this item? This cannot be undone unless you have an export backup.")) {
+      items = items.filter(x => x.id !== editingId);
+      saveItems(); render(); closeModal(); showToast("Item deleted.");
+    }
+  });
+  $("addTop").addEventListener("click", () => openModal());
+  $("closeModal").addEventListener("click", closeModal);
+  $("cancelBtn").addEventListener("click", closeModal);
+  $("modalBackdrop").addEventListener("click", e => { if (e.target === $("modalBackdrop")) closeModal(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+  ["searchInput","sortSelect"].forEach(id => $(id).addEventListener(id === "searchInput" ? "input" : "change", render));
+  document.querySelectorAll("[data-category]").forEach(button => button.addEventListener("click", () => {
+    activeCategory = button.dataset.category;
+    document.querySelectorAll("[data-category]").forEach(tab => tab.classList.toggle("active", tab === button));
+    render();
+  }));
+  document.querySelectorAll("[data-mode]").forEach(button => button.addEventListener("click", () => {
+    fruitMode = button.dataset.mode;
+    document.querySelectorAll("[data-mode]").forEach(modeButton => modeButton.classList.toggle("active", modeButton === button));
+    render();
+  }));
+  $("itemList").addEventListener("click", e => {
+    const modeButton = e.target.closest("[data-card-mode]");
+    if (modeButton) {
+      fruitMode = modeButton.dataset.cardMode;
+      document.querySelectorAll("[data-mode]").forEach(b => b.classList.toggle("active", b.dataset.mode === fruitMode));
+      render();
+    }
+  });
+
+  $("exportBtn").addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify(items, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "blox-fruits-values-backup.json"; a.click();
+    URL.revokeObjectURL(url);
+    showToast("Backup exported.");
+  });
+  $("importBtn").addEventListener("click", () => $("importFile").click());
+  $("importFile").addEventListener("change", async e => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const imported = JSON.parse(await file.text());
+      if (!Array.isArray(imported) || imported.some(x => !x || typeof x !== "object")) throw new Error("Invalid format");
+      if (!confirm(`Import ${imported.length} items and replace the current list? Export a backup first if needed.`)) return;
+      items = imported.map(x => ({
+        id: String(x.id || makeId()),
+        name: String(x.name || ""),
+        icon: String(x.icon || ""),
+        value: x.value === "" || x.value == null ? "" : String(x.value),
+        permanentValue: x.permanentValue === "" || x.permanentValue == null ? "" : String(x.permanentValue),
+        rarity: String(x.rarity || ""),
+        status: String(x.status || ""),
+        demand: String(x.demand || ""),
+        fruitType: String(x.fruitType || ""),
+        beli: String(x.beli || ""),
+        type: ["fruit","gamepass","limited"].includes(x.type) ? x.type : "fruit",
+        blankSlot: Boolean(x.blankSlot)
+      }));
+      saveItems(); render(); showToast("Backup imported.");
+    } catch (err) {
+      alert("That file couldn't be imported. Please choose a JSON backup exported from this website.");
+    } finally { e.target.value = ""; }
+  });
+
+  $("year").textContent = new Date().getFullYear();
+  updateStats();
+  render();
+})();
+</script>
+</body>
+</html>
