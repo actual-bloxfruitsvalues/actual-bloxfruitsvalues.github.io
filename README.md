@@ -1,2 +1,2 @@
-# blox-fruits-values
+# blox
 Blox fruits values website
