@@ -186,6 +186,8 @@
     *, *::before, *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; scroll-behavior:auto !important; }
   }
 </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>body:not(.admin-mode) #addTop, body:not(.admin-mode) #importBtn, body:not(.admin-mode) [data-edit], body:not(.admin-mode) [data-duplicate], body:not(.admin-mode) #deleteBtn { display:none !important; }</style>
 </head>
 <body>
 <header>
@@ -195,7 +197,8 @@
       <div><span>Blox Fruits Value Website</span><small>Community value index</small></div>
     </div>
     <div class="nav-actions">
-      <div class="pill"><span class="dot"></span> Saved on this device</div>
+      <div class="pill" id="saveStatus"><span class="dot"></span> Connecting…</div>
+      <button class="btn btn-secondary" id="authBtn">Admin login</button>
       <button class="btn btn-primary" id="addTop">＋ Add item</button>
     </div>
   </div>
@@ -251,7 +254,7 @@
   </section>
 
   <div class="notice">
-    <strong>Heads up:</strong> This is a personal, editable tracker, not an official Blox Fruits value feed. Values are intentionally left blank until you enter them. Data is saved in this browser using local storage; use <em>Export backup</em> to keep a copy or move your data to another device.
+    <strong>Heads up:</strong> This is a personal, editable tracker, not an official Blox Fruits value feed. Values are intentionally left blank until you enter them. Values are shared online through Supabase. Admin editing requires an administrator login. Use <em>Export backup</em> to keep a copy.
   </div>
 </main>
 
@@ -290,6 +293,11 @@
 <script>
 (() => {
   const STORAGE_KEY = "bf-value-website-items-v1";
+  const SUPABASE_URL = "https://xffqsnkkisqqpgtckclz.supabase.co";
+  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_sscCSvpNJYYR3wzJ8nrcFg__3rZczK-";
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+  let isAdmin = false;
+  let isLoadingRemote = true;
   const REQUIRED_SLOTS = { fruit: 43, limited: 40, gamepass: 9 };
   function createBlankItem(type) {
     return {
@@ -333,14 +341,62 @@
     } catch (e) { console.warn("Could not load saved items", e); }
     return starterItems;
   }
-  function saveItems() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-      updateStats();
-    } catch (e) {
-      showToast("Could not save data. Export a backup or free browser storage.");
+  async function saveItems() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); }
+    catch (e) { showToast("Could not save a local backup. Export a backup if needed."); }
+    updateStats();
+    if (isAdmin && !isLoadingRemote) {
+      const { error } = await supabase.from("site_data").update({ data: items, updated_at: new Date().toISOString() }).eq("id", 1);
+      if (error) { console.error(error); showToast("Local copy saved, but online save failed: " + error.message); }
+      else { setSaveStatus("Saved online"); }
     }
   }
+  function setSaveStatus(message) { const el = $("saveStatus"); if (el) el.innerHTML = '<span class="dot"></span> ' + escapeHtml(message); }
+  function applyAdminMode() {
+    document.body.classList.toggle("admin-mode", isAdmin);
+    $("authBtn").textContent = isAdmin ? "Log out" : "Admin login";
+    setSaveStatus(isAdmin ? "Admin · online sync" : "Live values");
+    render();
+  }
+  async function loadRemoteData() {
+    const { data, error } = await supabase.from("site_data").select("data").eq("id", 1).maybeSingle();
+    if (error) { console.error(error); setSaveStatus("Connection error"); return false; }
+    if (Array.isArray(data?.data)) {
+      items = data.data.map(x => ({ permanentValue:"", rarity:"", status:"", demand:"", fruitType:"", beli:"", ...x,
+        type:["fruit","gamepass","limited"].includes(x.type) ? x.type : "fruit" }));
+      for (const [type, count] of Object.entries(REQUIRED_SLOTS)) {
+        const n = items.filter(item => item.type === type).length;
+        for (let i=n; i<count; i++) items.push(createBlankItem(type));
+      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    }
+    return true;
+  }
+  async function handleAdminLogin() {
+    if (isAdmin) {
+      await supabase.auth.signOut(); isAdmin = false; applyAdminMode(); showToast("Logged out."); return;
+    }
+    const email = prompt("Enter your admin email:"); if (!email) return;
+    const password = prompt("Enter your admin password:"); if (!password) return;
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) { alert("Login failed: " + error.message); return; }
+    const { data: adminRow, error: adminError } = await supabase.from("site_admins").select("user_id").eq("user_id", data.user.id).maybeSingle();
+    if (adminError || !adminRow) { await supabase.auth.signOut(); alert("This account is not an administrator."); return; }
+    isAdmin = true;
+    isLoadingRemote = true;
+    const { data: row, error: readError } = await supabase.from("site_data").select("data").eq("id", 1).single();
+    if (!readError && Array.isArray(row?.data)) {
+      await loadRemoteData();
+    } else {
+      // First admin login: use this browser's saved list as the initial shared database.
+      const { error: writeError } = await supabase.from("site_data").update({data: items, updated_at:new Date().toISOString()}).eq("id", 1);
+      if (writeError) { alert("Could not initialise online values: " + writeError.message); }
+    }
+    isLoadingRemote = false;
+    applyAdminMode(); updateStats(); render();
+    showToast("Admin login successful.");
+  }
+  $("authBtn").addEventListener("click", handleAdminLogin);
   function escapeHtml(value) {
     return String(value ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
@@ -608,8 +664,16 @@
   });
 
   $("year").textContent = new Date().getFullYear();
-  updateStats();
-  render();
+  (async () => {
+    await loadRemoteData();
+    isLoadingRemote = false;
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (sessionData?.session?.user) {
+      const { data: adminRow } = await supabase.from("site_admins").select("user_id").eq("user_id", sessionData.session.user.id).maybeSingle();
+      isAdmin = !!adminRow;
+    }
+    applyAdminMode(); updateStats(); render();
+  })();
 })();
 </script>
 </body>
